@@ -1,0 +1,20 @@
+{
+  "_comment": [
+    "示例 —— 正常情况下【不需要】手工编辑这个文件。",
+    "`python hosts/workbuddy/install.py --apply` 会自动把这一条写进 ~/.workbuddy/mcp.json，",
+    "command 与 MARCH7_HOME 都由本机解析结果渲染（ADR-0055 决策 1）。",
+    "只有需要手写配置时才参考这里：<REPO> 换仓库绝对路径、<HOME> 换用户目录，",
+    "路径用 `/`（Windows 钩子经 Git Bash 执行，反斜杠会被吃掉）。"
+  ],
+  "mcpServers": {
+    "March7": {
+      "command": "<REPO>/.venv/Scripts/python.exe",
+      "args": ["-m", "March7"],
+      "env": {
+        "MARCH7_HOME": "<HOME>/.March7",
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}

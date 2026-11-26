@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="March7 用户手册：安装、接入三个 AI 宿主、配置模型、自然语言管理记忆、记忆面板与排错。">
+<title>March7 用户手册</title>
+<style>
+:root{color-scheme:light;
+  --ink:#16233a;--body:#33415c;--muted:#5b6b85;--blue:#24479a;--blue2:#5b6fd6;
+  --line:#dde4f1;--paper:#f7f9fd;--white:#fff;--pink:#fbeff6;--ok:#0a7a52;--okbg:#eafaf2;
+  --warn:#a15c00;--warnbg:#fff6e6;--bad:#a32626;--badbg:#fdf0f0;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:18px}
+body{margin:0;background:var(--paper);color:var(--body);
+  font:16px/1.78 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-underline-offset:.2em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid #6c52b1;outline-offset:3px}
+.wrap{width:min(1140px,calc(100% - 44px));margin-inline:auto}
+
+/* header */
+.head{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.head .wrap{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-weight:850;letter-spacing:.05em;color:var(--ink);text-decoration:none;font-size:15px}
+.head .meta{color:var(--muted);font-size:13px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;background:#eef2fb;border:1px solid var(--line);
+  color:var(--blue);font-size:12px;font-weight:700}
+
+/* hero */
+.hero{background:
+  radial-gradient(ellipse at 86% 22%,#f6e6f3 0,transparent 55%),
+  linear-gradient(128deg,#e9f1ff 0,#f5f4fc 58%,#fff0f5 100%);
+  border-bottom:1px solid var(--line)}
+.hero .wrap{display:grid;grid-template-columns:1.06fr .94fr;gap:44px;align-items:center;padding:52px 0 46px}
+.hero h1{font-size:clamp(30px,4.6vw,52px);line-height:1.16;letter-spacing:-.03em;margin:0 0 16px;color:var(--ink);font-weight:820}
+.hero h1 em{font-style:normal;background:linear-gradient(92deg,#24479a,#8b3aa8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{max-width:33em;margin:0 0 22px;color:var(--muted);font-size:16.5px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.button{display:inline-block;padding:10px 18px;border-radius:11px;background:var(--blue);color:#fff;
+  font-weight:750;text-decoration:none;font-size:14.5px;box-shadow:0 8px 18px -8px #24479a66}
+.button.secondary{color:var(--blue);background:#fff;border:1px solid #c9d6ec;box-shadow:none}
+.card-example{background:#fffffff0;border:1px solid #fff;border-radius:20px;padding:20px 22px;box-shadow:0 20px 48px #33446c1c}
+.card-example h2{font-size:13px;letter-spacing:.06em;color:var(--muted);margin:0 0 14px;font-weight:800}
+.bubble{background:#eaf2ff;border-radius:13px;padding:11px 14px;margin:0 0 12px}
+.bubble.reply{background:var(--pink);margin-bottom:0}
+.who{font-size:11.5px;font-weight:800;color:#4a5c7d;letter-spacing:.03em;margin-bottom:3px}
+.bubble p{margin:0;color:var(--ink);font-size:14.5px;line-height:1.65}
+
+/* layout */
+.shell{display:grid;grid-template-columns:186px minmax(0,1fr);gap:34px;padding:34px 0 64px}
+.toc{align-self:start;position:sticky;top:78px;font-size:13.5px}
+.toc strong{display:block;margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;color:var(--muted)}
+.toc a{display:block;padding:4px 8px;border-radius:7px;color:var(--body);text-decoration:none;border-left:2px solid transparent}
+.toc a:hover{background:#fff;color:var(--blue)}
+.toc a.on{background:#fff;color:var(--blue);border-left-color:var(--blue);font-weight:700}
+.toc .sub{padding-left:18px;font-size:12.8px;color:var(--muted)}
+
+main{min-width:0}
+section.s{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:26px 30px;margin-bottom:18px;box-shadow:0 1px 2px #16233a08}
+section.s>h2{font-size:23px;line-height:1.3;margin:0 0 6px;color:var(--ink);font-weight:820;letter-spacing:-.01em}
+section.s>h2 .n{display:inline-block;min-width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;
+  background:#eef2fd;color:var(--blue);font-size:14px;font-weight:850;margin-right:9px;vertical-align:2px}
+section.s>.sub{margin:0 0 20px;color:var(--muted);font-size:14px}
+h3{font-size:16.5px;margin:24px 0 8px;color:var(--ink);font-weight:780}
+h3 .tag{font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#eef2fb;color:var(--blue);margin-left:7px;vertical-align:2px;letter-spacing:.03em}
+h4{font-size:14.5px;margin:16px 0 6px;color:var(--ink)}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:1.45em}
+li{margin:5px 0}
+li::marker{color:#8a9bbd}
+strong{color:var(--ink);font-weight:750}
+code{font:.88em/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#284380;background:#f2f5fc;
+  border:1px solid #e4eaf6;border-radius:5px;padding:1px 5px;overflow-wrap:anywhere}
+
+/* components */
+.t{width:100%;border-collapse:separate;border-spacing:0;margin:10px 0 16px;font-size:14px;
+  border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.t th{background:#f6f8fd;color:var(--muted);text-align:left;padding:9px 12px;font-size:12.5px;
+  letter-spacing:.03em;border-bottom:1px solid var(--line);font-weight:800}
+.t td{padding:9px 12px;border-bottom:1px solid #eef1f8;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t td.k{font-weight:750;color:var(--ink);white-space:nowrap}
+
+.note{background:#eef3ff;border-left:4px solid #637dc6;border-radius:6px;padding:11px 14px;margin:13px 0;font-size:14.3px}
+.note p:last-child{margin-bottom:0}
+.note.warn{background:var(--warnbg);border-left-color:#d79a2b}
+.note.ok{background:var(--okbg);border-left-color:#38a37a}
+.note b{color:var(--ink)}
+
+/* 操作块 */
+.step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0;background:#fcfdff}
+.step .say{font-size:14.5px;color:var(--ink);margin:0 0 6px}
+.step .say::before{content:"说";display:inline-block;font-size:10.5px;font-weight:850;color:#fff;background:var(--blue2);
+  border-radius:5px;padding:1px 5px;margin-right:7px;vertical-align:2px;letter-spacing:.05em}
+.step .see{font-size:13.6px;color:var(--muted);margin:0}
+.step .see::before{content:"看到";display:inline-block;font-size:10.5px;font-weight:850;color:var(--ok);
+  background:var(--okbg);border:1px solid #b7e6d2;border-radius:5px;padding:1px 5px;margin-right:7px;vertical-align:2px;letter-spacing:.03em}
+.verified{display:inline-block;font-size:10.5px;font-weight:850;color:var(--ok);background:var(--okbg);
+  border:1px solid #b7e6d2;border-radius:5px;padding:0 5px;margin-left:6px;vertical-align:1px}
+
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:12px 0}
+.tile{border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:#fbfcff}
+.tile h4{margin:0 0 5px;font-size:14.5px}
+.tile p{font-size:13.6px;color:var(--muted);margin:0}
+.hosttag{display:inline-block;width:19px;height:19px;line-height:19px;text-align:center;border-radius:6px;
+  font-size:11px;font-weight:850;color:#fff;margin-right:6px;vertical-align:1px}
+.w{background:#2f5fd0}.c{background:#4b4b57}.d{background:#7a4fb3}
+
+details{border-top:1px solid var(--line);padding:11px 0}
+details:last-of-type{padding-bottom:0}
+summary{cursor:pointer;color:var(--blue);font-weight:720;font-size:14.6px}
+details[open] summary{margin-bottom:8px}
+details p,details ul,details ol{font-size:14.3px}
+
+pre{margin:9px 0 13px;padding:11px 14px;background:#f1f5fb;border:1px solid #e4eaf6;border-radius:9px;
+  white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.3px;line-height:1.6}
+pre code{background:none;border:0;padding:0;color:#26406f}
+
+blockquote{margin:10px 0 13px;padding:10px 14px;border-left:3px solid #97aadd;background:#f7f9ff;border-radius:5px;font-size:14.5px}
+blockquote p:last-child{margin-bottom:0}
+.q-mark{color:#8fa3c9;font-weight:800}
+
+.footer{border-top:1px solid var(--line);padding:20px 0 26px;color:var(--muted);font-size:13px}
+.footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media(max-width:900px){
+  .hero .wrap{grid-template-columns:1fr;gap:24px;padding:34px 0 30px}
+  .shell{grid-template-columns:1fr;gap:12px}
+  .toc{position:static;display:flex;gap:6px 12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:10px 12px}
+  .toc strong{width:100%;margin:0 0 2px}
+  .toc a{border-left:0;padding:2px 6px}
+  .grid3,.grid2{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .wrap{width:calc(100% - 28px)}
+  section.s{padding:20px 17px}
+  section.s>h2{font-size:20px}
+  .head .meta{display:none}
+}
+@media print{
+  .head,.toc,.actions,.footer{display:none}
+  .hero,.s{box-shadow:none;border:0;background:#fff}
+  .shell{display:block;padding:0}.hero .wrap{display:block;padding:0 0 18px}
+  section.s{padding:10px 0;page-break-inside:avoid}
+}
+</style>
+</head>
+<body id="top">
+
+<header class="head"><div class="wrap">
+  <a class="brand" href="#top">March7</a>
+  <div class="meta"><span class="pill">测试版 0.1.0</span><span>用户手册 · 2026-11-26</span><a href="#install">直接看安装</a></div>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <div>
+    <h1>换个 AI 搭子，<br><em>不用从头讲</em>。</h1>
+    <p class="lead">March7 在你自己的电脑上记一份长期记忆，让 WorkBuddy、Codex、DeepSeek Harness 共用。你说过的话留在本机，换工具时能找回来，还附上当时的原话。</p>
+    <div class="actions">
+      <a class="button" href="#install">从安装开始</a>
+      <a class="button secondary" href="#talk">直接看怎么用</a>
+      <a class="button secondary" href="#panel">记忆面板</a>
+    </div>
+  </div>
+  <div class="card-example">
+    <h2>一次真实的接力 · 2026-11 实测</h2>
+    <div class="bubble"><div class="who">在 WorkBuddy 里说</div><p>「帮我检查个人记忆」</p></div>
+    <div class="bubble reply"><div class="who">换到 Codex 后说</div><p>「当前库和项目」</p></div>
+    <p style="margin:10px 0 0;font-size:12.5px;color:#6b7c9c">两个工具看到的是同一个库编号。项目细节另说一句「用 March7 查这个项目上次定了什么」。</p>
+  </div>
+</div></section>
+
+<div class="wrap shell">
+<nav class="toc" aria-label="手册目录">
+  <strong>目录</strong>
+  <a href="#what">1 它是什么</a>
+  <a href="#before">2 装之前</a>
+  <a href="#install">3 安装</a>
+  <a href="#hosts">4 接入宿主</a>
+  <a href="#llm">5 配置模型</a>
+  <a href="#first">6 第一次验证</a>
+  <a href="#talk">7 用说话管记忆</a>
+  <a href="#panel">8 记忆面板</a>
+  <a href="#differ">9 三个宿主的差别</a>
+  <a href="#trouble">10 出问题怎么办</a>
+  <a href="#privacy">11 隐私与卸载</a>
+  <a href="#feedback">12 反馈</a>
+  <a href="#cli">附录 A 命令行</a>
+  <a href="#files">附录 B 文件位置</a>
+</nav>
+
+<main>
+
+<!-- 1 -->
+<section class="s" id="what">
+  <h2><span class="n">1</span>它是什么</h2>
+  <p class="sub">一句话：给同一台电脑上的多个 AI 助手，共用一本记事儿的小本子。</p>
+
+  <div class="grid3">
+    <article class="tile"><h4>记住长期偏好</h4><p>「我以后希望周报先列结论，再列细节。」这类规则会跨会话留下。</p></article>
+    <article class="tile"><h4>换工具接着干</h4><p>一个工具里确认过的项目决定，另一个工具能查回来，带原话。</p></article>
+    <article class="tile"><h4>能核对也能删</h4><p>每条都有原话和来源；改、归档、永久删除都由你发起，删除有回执。</p></article>
+  </div>
+
+  <h3>它不做什么</h3>
+  <ul>
+    <li><strong>不是自动接力。</strong>换工具后要你说一句「查一下」，记忆不会自己跳进新对话。</li>
+    <li><strong>不保证回答更准。</strong>测试版实测里，完整记忆的答对率低于模型自己写的交接笔记。它的价值在「少讲一遍」和「可核对」，不在「更聪明」。</li>
+    <li><strong>不做多设备同步。</strong>单人单机，多个宿主共用一份本机库；没有云端账号。</li>
+    <li><strong>不做本地小模型兜底。</strong>判断「值不值得记」要调用你配置的模型，会产生费用。</li>
+  </ul>
+
+  <div class="note"><b>三个宿主，一套用法。</b>安装步骤按宿主略有不同，但聊天里的话术、面板、数据格式完全一致。你可以在三个工具里说同样的话。</div>
+</section>
+
+<!-- 2 -->
+<section class="s" id="before">
+  <h2><span class="n">2</span>装之前</h2>
+  <p class="sub">先确认机器在表里，再看要花多少时间和磁盘。</p>
+
+  <table class="t">
+    <thead><tr><th style="width:30%">平台</th><th style="width:20%">能不能装</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Windows 10 / 11 x64 + NVIDIA 显卡</td><td><strong>可以</strong></td><td>本机三宿主全链路实测过，这是当前最稳的组合</td></tr>
+      <tr><td class="k">Windows 10 / 11 x64 + 核显</td><td>可以装，未验完</td><td>依赖和预制检查能过；首次编码在虚拟机上崩过一次，真实机器还没复现</td></tr>
+      <tr><td class="k">macOS 15+ Apple Silicon</td><td>引擎可用</td><td>原生冷装与记忆引擎已验证；三个宿主在 Mac 上的桌面体验还没验收</td></tr>
+      <tr><td class="k">macOS Intel</td><td><strong>装不上</strong></td><td>锁文件里没有对应的 PyTorch 包</td></tr>
+      <tr><td class="k">Windows ARM / 32 位 / Linux</td><td><strong>不行</strong></td><td>没有轮子或未适配</td></tr>
+    </tbody>
+  </table>
+
+  <h3>你需要准备</h3>
+  <table class="t">
+    <tbody>
+      <tr><td class="k" style="width:26%">磁盘</td><td>约 <strong>8 GB</strong>（依赖 3.5 GB + 模型缓存 4.6 GB）。装在剩余空间不足 10 GB 的 C 盘容易失败。</td></tr>
+      <tr><td class="k">时间</td><td>首次装完到能用 <strong>10–20 分钟</strong>：依赖约 2 分钟，模型下载和首次编码约 4 分钟，其余是重启宿主和点信任。</td></tr>
+      <tr><td class="k">模型账号</td><td>一个 <strong>OpenAI 兼容</strong>的接口（base_url + api_key + 模型名），支持 Chat Completions 和 JSON 输出。国内常见供应商都可以。</td></tr>
+      <tr><td class="k">宿主</td><td>WorkBuddy / Codex / DeepSeek Harness，至少装一个；三个都装就三个都能用同一份记忆。</td></tr>
+      <tr><td class="k">系统组件</td><td>干净的 Windows 先装 <a href="https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist/">微软 Visual C++ 运行库 x64</a>，PyTorch 的 CPU 路径也需要它。</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note warn"><b>路径不要带中文和空格。</b>解压到 <code>C:\March7</code> 这种路径最稳。带中文的路径在部分工具链上会出问题，排查起来很费时间。</div>
+</section>
+
+<!-- 3 -->
+<section class="s" id="install">
+  <h2><span class="n">3</span>安装</h2>
+  <p class="sub">四步。所有命令都在解压后的 March7 目录里执行。</p>
+
+  <h3>第 1 步 · 解压</h3>
+  <p><strong>先新建一个空文件夹</strong>（例如 <code>C:\March7</code>），再把 zip 解压进去。压缩包里没有顶层文件夹，直接「解压到当前文件夹」会把一百多个文件铺在桌面或下载目录。</p>
+  <p>解压后这个目录里应该能看到 <code>README.md</code>、<code>用户手册.html</code>、<code>pyproject.toml</code>、<code>src\</code>、<code>hosts\</code>。看不到就说明解压位置不对。</p>
+
+  <h3>第 2 步 · 装依赖</h3>
+  <pre><code>uv sync --locked --python 3.12</code></pre>
+  <p>没装 uv 的话先装：Windows 用 <code>powershell -c "irm https://astral.sh/uv/install.ps1 | iex"</code>，macOS 用 <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code>。装完重开终端。</p>
+  <div class="note"><b>期望结果：</b>最后一行是 <code>Installed …</code>，退出码 0。第一次会下载约 3 GB，慢是正常的。</div>
+
+  <h3>第 3 步 · 预检</h3>
+  <pre><code>uv run python scripts/doctor.py --preflight</code></pre>
+  <p>它会逐项报「安装基础 / 完整写读依赖 / 各盘可用空间」，中文说明缺什么、去哪儿补。全绿再往下走；有 ✗ 就按它右边那句话修，不要跳过。</p>
+  <p>想连模型一起验（会下载权重、多花几分钟）：</p>
+  <pre><code>uv run python scripts/doctor.py --preflight --probe-embedder</code></pre>
+
+  <div class="note ok"><b>不想自己敲命令？</b>把包目录里的 <code>AI-SETUP.md</code> 交给你常用的 AI 助手，说「按这个文件帮我装 March7」。这份文件写了每一步的命令、期望输出、退出码和失败分支，也写明了哪些事不能替你做（改依赖、删数据、回显密钥）。装完让它按里面的验收清单逐项跑一遍。</div>
+
+  <h3>第 4 步 · 接入宿主</h3>
+  <p>见下一节。三个宿主各装各的，装完都要<strong>完全退出再重开</strong>（只关窗口不算，配置在启动时快照）。</p>
+
+  <div class="note ok"><b>装完的目录长这样：</b><code>src\March7\</code> 是引擎，<code>hosts\</code> 是三个宿主的安装器，<code>docs\</code> 是说明，<code>用户手册.html</code> 就是本文件——离线可看，双击即开。</div>
+</section>
+
+<!-- 4 -->
+<section class="s" id="hosts">
+  <h2><span class="n">4</span>接入宿主</h2>
+  <p class="sub">三选一、三选二、或三个都装。装哪个就在哪个工具里能用，记忆是同一份。</p>
+
+  <h3><span class="hosttag w">W</span>WorkBuddy<span class="tag">最完整</span></h3>
+  <p>自动写入、开场带背景、一句话开面板，三样都有。</p>
+  <pre><code>uv run python hosts/workbuddy/install.py --doctor
+uv run python hosts/workbuddy/install.py --set-llm
+uv run python hosts/workbuddy/install.py --apply</code></pre>
+  <ul>
+    <li><code>--doctor</code>：只读检查四项，期望四行都 <code>OK</code>。</li>
+    <li><code>--set-llm</code>：交互式填 base_url / api_key / 模型名，探针通过才落盘（详见第 5 节）。</li>
+    <li><code>--apply</code>：一次写三处——钩子脚本、<code>settings.json</code> 的 hooks 块、<code>mcp.json</code> 的 March7 条目；任一失败整体回滚。</li>
+  </ul>
+  <p>装完<strong>完全退出 WorkBuddy 再打开</strong>。第一次连到 March7 时，到「专家·技能·连接器 → 连接器 → 自定义连接器」点一次「信任」。</p>
+  <div class="note warn"><b>退出码：</b>0 全绿；2 数据目录不可用或非空（加 <code>--reuse</code> 或 <code>--data-dir</code>）；3 解释器/包不可用（先 <code>uv sync</code>）；4 写入校验失败（已回滚）；5 模型探针失败；<b>1 不是契约码</b>——出现 1 说明有未预期的异常，把完整输出发给我。</div>
+
+  <h3><span class="hosttag c">C</span>Codex</h3>
+  <p>安装器同时写 <code>notify</code>（轮末写入）和 MCP 表（工具面），另加面板钩子。</p>
+  <pre><code>uv run python hosts/codex/install.py --doctor
+uv run python hosts/codex/install.py --apply</code></pre>
+  <p>Codex 的 MCP 子进程<strong>不继承用户环境变量</strong>，只认 <code>config.toml</code> 里 <code>[mcp_servers.March7.env]</code> 那张表——安装器会替你写好。已有的绑定可以用 <code>--panel-only</code> 只刷新面板钩子。</p>
+  <div class="note"><b>换库要成对。</b>MCP 配置和轮末钩子必须指向同一个目录。安装器已按同源处理；手工改过配置的话，改完完整重启 Codex，说一句「当前库和项目」核对。</div>
+
+  <h3><span class="hosttag d">D</span>DeepSeek Harness</h3>
+  <pre><code>uv run python hosts/dsh/install.py --apply</code></pre>
+  <p>默认 <code>--mode profile</code>：开场注入画像，聊天里能开面板、能明确补记。另有 <code>--mode turn</code>（每轮召回，实验性）和 <code>--mode none</code>（只装工具面）。</p>
+  <p>DSH 没有轮末写入钩子：要它记，就在聊天里明确说一句「帮我记住……」。</p>
+
+  <h3>三个都装？</h3>
+  <p>可以。三个安装器默认都指向同一个数据目录（<code>~/.March7</code>），所以记忆天然共用。如果给某个宿主单独指定了 <code>--data-dir</code>，记得另外两个也指到同一个目录，否则会出现「A 记的 B 查不到」。</p>
+
+  <div class="note"><b>卸载：</b><code>install.py --uninstall</code>（三个宿主各有）。只移除它自己写的条目，你自己的键一个不少；钩子文件是移走不是删除。卸载<strong>不动记忆库</strong>。</div>
+</section>
+
+<!-- 5 -->
+<section class="s" id="llm">
+  <h2><span class="n">5</span>配置模型（API key）</h2>
+  <p class="sub">March7 用你选的模型判断「这句值不值得记」、遇到冲突时裁决。没有 key 也能装，但写入会失败。</p>
+
+  <h3>填什么</h3>
+  <table class="t">
+    <thead><tr><th style="width:22%">项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="k">base_url</td><td>OpenAI 兼容端点，通常以 <code>/v1</code> 结尾。例如供应商文档给的 <code>https://api.example.com/v1</code>。</td></tr>
+      <tr><td class="k">api_key</td><td>你的密钥。只写进宿主的配置文件，不进仓库、不进日志。</td></tr>
+      <tr><td class="k">model</td><td>模型名，按供应商文档填。建议选便宜、支持 JSON 输出的型号——它每轮只做分类判断。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>怎么填</h3>
+  <pre><code>uv run python hosts/workbuddy/install.py --set-llm</code></pre>
+  <p>按提示输入三项，它会发一次很小的请求验证连通性。<strong>探针失败就一个字节都不写</strong>，旧配置原样保留。也可以一次传参（适合脚本）：</p>
+  <pre><code>uv run python hosts/workbuddy/install.py --set-llm --llm-base-url "https://api.example.com/v1" --llm-model "your-model"</code></pre>
+
+  <h3>换了 key 怎么办</h3>
+  <p>WorkBuddy 重跑一次 <code>--set-llm</code>，通过后<strong>完全退出并重启</strong>。多宿主用户要分别对齐：</p>
+  <ul>
+    <li>Codex：工具配置和自动写入用的进程环境是两套，重跑 <code>hosts/codex/install.py --apply</code>。</li>
+    <li>DSH：重新应用插件配置。</li>
+    <li>一次改齐四处副本：<code>uv run python scripts/rotate_llm_key.py</code>。</li>
+  </ul>
+  <div class="note warn"><b>不要把 key 贴进反馈。</b>截图、日志、配置文件都先删掉 key 和私人内容。</div>
+</section>
+
+<!-- 6 -->
+<section class="s" id="first">
+  <h2><span class="n">6</span>第一次验证</h2>
+  <p class="sub">三步。过了这三步，才说明「写入 → 存储 → 召回」整条链路通了。</p>
+
+  <h3>① 工具连上了吗</h3>
+  <div class="step">
+    <p class="say">在任意已接入的宿主里：<strong>「调用 March7_status 看一下状态」</strong></p>
+    <p class="see">返回 <code>march7_version</code>、<code>db_schema_version</code>、<code>memory_count</code>。看不到这个工具，说明宿主没连上——回去检查是否完全重启、是否点了信任。</p>
+  </div>
+
+  <h3>② 写得进去吗</h3>
+  <div class="step">
+    <p class="say">说一句低敏事实：<strong>「帮我记住，我每周日早上参加青苔星钟合奏。」</strong></p>
+    <p class="see">回答结束后等几秒（后台写入）。然后在安装目录运行下面这行，能看到这条就说明写成功了。</p>
+  </div>
+  <pre><code>uv run python -m March7.control list</code></pre>
+
+  <h3>③ 找得回来吗</h3>
+  <div class="step">
+    <p class="say"><strong>「帮我查一下青苔星钟」</strong></p>
+    <p class="see">回复里有这条记忆、匹配理由和<strong>原话</strong>。换一个宿主、同一个项目目录再查一次，能看到同一条，接力就成立了。</p>
+  </div>
+
+  <div class="note"><b>列表是空的？</b>先跑 <code>uv run python -m March7.control why --last</code>，它会告诉你这一轮为什么没写：模型判定不值得记、被过滤规则拒收、还是请求失败。</div>
+</section>
+
+<!-- 7 -->
+<section class="s" id="talk">
+  <h2><span class="n">7</span>用说话管记忆</h2>
+  <p class="sub">这一节是日常主路径。标 <span class="verified">实测</span> 的句子，是 2026 年 11 月在三宿主里真实说过的；方括号里是可替换的示例内容。</p>
+
+  <h3>记一条</h3>
+  <div class="step"><p class="say">「帮我记住，我以后希望周报先列结论，再列细节。」</p><p class="see">回复会说明实际补记了什么。工作流类、偏好类、项目决定最适合；一次性任务（「帮我改这段代码」）不会被记。</p></div>
+  <div class="step"><p class="say"><strong>「在 March7 测试记忆库里，把『周末住在杭州』改成『只在每年七月住在杭州』」</strong><span class="verified">实测</span></p><p class="see">明确点出库名或项目、用引号给出目标，识别率最高。改完旧版留在历史里。</p></div>
+
+  <h3>查回来</h3>
+  <div class="step"><p class="say">「用 March7 查一下这个项目上次定了什么，把原话一起给我。」</p><p class="see">返回条目 + 来源原话 + 适用条件。没有命中时会直说「没找到」，不会编。</p></div>
+  <div class="step"><p class="say">「帮我搜一下『青苔星钟』」</p><p class="see">按关键词找，适合你记得字面、不记得语义的时候。</p></div>
+  <div class="step"><p class="say"><strong>「当前库和项目」</strong><span class="verified">实测</span></p><p class="see">返回库编号、路径和项目假名。跨宿主对不上号时，先问这一句。</p></div>
+
+  <h3>改、归档、恢复</h3>
+  <div class="step"><p class="say">「把这条改成『我用黄册记录演练步骤』」</p><p class="see">纠正会新建版本，旧原话进历史。同名多条时先报「第几条」或补一句能区分的文字。</p></div>
+  <div class="step"><p class="say"><strong>「把这条记忆归档」</strong><span class="verified">实测</span> / 「还原刚才那条」</p><p class="see">归档后不再参与普通召回，但能在面板「历史」里找到并恢复。</p></div>
+
+  <h3>删掉</h3>
+  <div class="step"><p class="say">「忘掉这条」</p><p class="see">先显示永久删除预览（正文 + 作用域）。核对后<strong>另发一条</strong>「确认删除」或「取消删除」。</p></div>
+  <div class="note warn"><b>授权边界：</b>预览只对同一聊天、同一项目、同一版本有效。换了聊天、说了别的请求、条目变了或超过时限，都要重新查一次。永久删除无法撤销，但会留一张不含正文的回执。</div>
+  <div class="step"><p class="say">「查看擦除回执」</p><p class="see">回执记录范围、条数、验证状态，不含被删正文。回执只能证明 March7 覆盖的范围——旧导出、备份、宿主原对话、模型服务商日志要分别处理。</p></div>
+
+  <h3>记忆体检与批量整理</h3>
+  <p>记忆多了会出现同义重复、旧版残留、错归项目的条目。体检就是一次性把它们找出来，给你一份可确认、可撤销的整理方案。</p>
+  <div class="step"><p class="say"><strong>「帮我检查个人记忆」</strong><span class="verified">实测</span> / 「检查当前项目记忆」</p><p class="see">返回几组候选：同义重复、相关但独立、有证据支持的更新、待复核。每组带编号。</p></div>
+  <div class="step"><p class="say"><strong>「按返回的组号，生成记忆整理预览」</strong><span class="verified">实测</span></p><p class="see">给出草稿编号（形如 <code>M7-…</code>）和「将归档哪几条、保留哪几条」。<strong>此时还没动库。</strong></p></div>
+  <div class="step"><p class="say"><strong>「确认个人记忆整理，批次号 M7-……」</strong><span class="verified">实测</span></p><p class="see">执行，出整理回执。不想执行就说「取消个人记忆整理，批次号 M7-……」。</p></div>
+  <div class="step"><p class="say"><strong>「预览撤销个人记忆整理，回执号 R-……」</strong><span class="verified">实测</span></p><p class="see">给出撤销预览，确认后原批标记为已撤销，被归档的条目恢复。</p></div>
+  <div class="step"><p class="say"><strong>「开启个人记忆自动体检」</strong><span class="verified">实测</span> / 「关闭个人记忆自动体检」</p><p class="see">默认关闭。开启后按范围复用上次结果，只在相关条目变化时重查。</p></div>
+
+  <h3>导出</h3>
+  <div class="step"><p class="say">「请导出我的记忆」/「导出记忆为 JSON」</p><p class="see">回复给条数和文件路径。导出文件含原话，分享前先看内容。</p></div>
+
+  <h3>问它为什么</h3>
+  <div class="step"><p class="say">「为什么没记住」/「为什么用了这条记忆」</p><p class="see">显示筛选原因、计数和预算。比翻日志快，也安全（只读，不调模型）。</p></div>
+</section>
+
+<!-- 8 -->
+<section class="s" id="panel">
+  <h2><span class="n">8</span>记忆面板：手动操作</h2>
+  <p class="sub">不想用说话的时候，所有事都能在面板里点。面板是本机网页，只监听 127.0.0.1。</p>
+
+  <h3>怎么打开</h3>
+  <ul>
+    <li><strong>在聊天里说</strong>：「打开 March7 记忆面板」（也认「开启 March7 记忆面板」）<span class="verified">实测</span></li>
+    <li><strong>双击入口</strong>：数据目录里与记忆库同放的 <code>March7 记忆面板.cmd</code>（三个宿主的安装器都会放一个）</li>
+    <li><strong>再打开</strong>：会复用已经跑着的服务，不重复起进程；会话过期后从原入口重开</li>
+  </ul>
+  <div class="note">面板打开的是「安装时绑定的那个库」。想看得另一个库，用「设置与切换库」，不会改变宿主绑定的库。</div>
+
+  <h3>六个分区</h3>
+  <table class="t">
+    <thead><tr><th style="width:18%">分区</th><th>里面是什么</th><th style="width:26%">能做什么</th></tr></thead>
+    <tbody>
+      <tr><td class="k">个人记忆</td><td>跨项目通用的长期事实、偏好、规则</td><td>搜索、查看详情、纠正、归档、永久擦除</td></tr>
+      <tr><td class="k">项目</td><td>带项目身份的进度与决定（按项目分开）</td><td>同上，另可切换项目范围</td></tr>
+      <tr><td class="k">画像</td><td>从长期事实里提炼的画像字段</td><td>只读查看；改画像要回聊天里提供原话</td></tr>
+      <tr><td class="k">历史</td><td>被纠正、归档、过期的旧版本</td><td>核对旧原话、恢复归档条目</td></tr>
+      <tr><td class="k">擦除回执</td><td>每次永久删除的范围、条数、验证状态</td><td>只读核对，不含被删正文</td></tr>
+      <tr><td class="k">设置与切换库</td><td>二次提醒开关、打开另一个已有库</td><td>分别关闭纠正/擦除的二次提醒；切库不改宿主绑定</td></tr>
+    </tbody>
+  </table>
+
+  <h3>找一条</h3>
+  <ol>
+    <li>搜索框输入正文、原话里的词，或直接贴记忆编号；</li>
+    <li>用状态下拉（有效 / 已归档 / 已过期 / 已被替代）和项目范围缩小；</li>
+    <li>点「查看详情」：原话、来源版本、写入时间、适用期限、作用域。</li>
+  </ol>
+
+  <h3>改一条</h3>
+  <p>详情页点「纠正」，输入<strong>一条完整的新事实</strong>（不是补丁）。提交后新版本生效，旧版进「历史」，随时能对照。默认要再确认一次；可以在设置里关掉提醒，但点了就是提交。</p>
+
+  <h3>归档 / 恢复</h3>
+  <p>归档 = 暂时停用，不参与召回也不出现在默认列表，但没删。到「历史」里找到它点「恢复」即可。适合「这个偏好先放放」。</p>
+
+  <h3>永久擦除</h3>
+  <ol>
+    <li>详情页点「永久擦除」；</li>
+    <li>核对预览里的正文和作用域；</li>
+    <li>确认后立即执行，<strong>没有恢复按钮</strong>；</li>
+    <li>到「擦除回执」核对结果。</li>
+  </ol>
+  <div class="note warn">擦除只覆盖 March7 自己存的那份。之前导出的文件、宿主自己的对话记录、备份、模型服务商的日志，都要各自处理。</div>
+
+  <h3>记忆体检（面板版）</h3>
+  <p>面板里点「记忆体检」，选个人或某个项目，看到的就是聊天里那句「帮我检查个人记忆」的结果。可以在这里看草稿、核对原话，再回聊天确认——两边读的是同一份状态。</p>
+
+  <h3>批量整理与撤销</h3>
+  <p>整理方案带草稿编号，执行后出回执；按回执可以生成撤销预览。<strong>换库、换范围、条目变化或超时后，旧方案失效</strong>，需要重新生成——这是防「拿着旧方案改错东西」的护栏。</p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="differ">
+  <h2><span class="n">9</span>三个宿主的差别</h2>
+  <p class="sub">同一套引擎、同一份记忆；差别在「谁负责写」和「开新会话时带不带背景」。</p>
+
+  <table class="t">
+    <thead><tr><th style="width:22%">能力</th><th>WorkBuddy</th><th>Codex</th><th>DeepSeek Harness</th></tr></thead>
+    <tbody>
+      <tr><td class="k">自动写入</td><td>每轮结束尝试</td><td>每轮结束尝试（notify）</td><td><strong>不做</strong>，要你明确说「帮我记住」</td></tr>
+      <tr><td class="k">开场带背景</td><td>有（会话启动注入）</td><td><strong>没有注入通道</strong></td><td>有（插件注入系统提示）</td></tr>
+      <tr><td class="k">主动查</td><td>可以</td><td>可以，但要它主动调工具</td><td>可以</td></tr>
+      <tr><td class="k">一句话开面板</td><td>原生入口</td><td>已信任的原生入口</td><td>原生入口（profile / turn 档）</td></tr>
+      <tr><td class="k">装机步骤</td><td>3 处配置</td><td>2 处（同一文件）</td><td>1 处（插件补丁）</td></tr>
+      <tr><td class="k">已知坑</td><td>安装时若已有别的插件共用 settings.json，安装器只剥离自己的条目</td><td>notify 是单值，和 computer-use 之类会冲突；换库要成对</td><td>写入依赖模型调工具，不会自己记</td></tr>
+    </tbody>
+  </table>
+
+  <h3>怎么做一次接力</h3>
+  <ol>
+    <li>在 A 里把事说清楚（偏好、决定、进度）；</li>
+    <li>换到 B，<strong>打开同一个项目目录</strong>（项目记忆按目录识别）；</li>
+    <li>在 B 里说「当前库和项目」核对库编号，再说「用 March7 查这个项目上次定了什么」。</li>
+  </ol>
+  <div class="note"><b>项目身份是门槛。</b>没有可信项目身份时，项目事实会拒写，而不是悄悄写进「全局」。所以换目录后如果发现「查不到」，先确认两边真的是同一个项目目录。</div>
+</section>
+
+<!-- 10 -->
+<section class="s" id="trouble">
+  <h2><span class="n">10</span>出问题怎么办</h2>
+  <p class="sub">先按症状查表；查不到再跑三条自查命令。</p>
+
+  <table class="t">
+    <thead><tr><th style="width:26%">症状</th><th style="width:32%">常见原因</th><th>怎么修</th></tr></thead>
+    <tbody>
+      <tr><td class="k">装依赖时报找不到 torch</td><td>当前架构没有对应轮子</td><td>对照第 2 节平台表；确认是 x64 不是 ARM</td></tr>
+      <tr><td class="k"><code>--apply</code> 退出 2，说目录非空</td><td>之前装过</td><td>加 <code>--reuse</code> 复用，或 <code>--data-dir</code> 换新库</td></tr>
+      <tr><td class="k">退出 5，探针失败</td><td>key 无效 / 余额 / 端点不兼容</td><td>重跑 <code>--set-llm</code>，确认 base_url 以 <code>/v1</code> 结尾</td></tr>
+      <tr><td class="k">工具列得出来，一调就报配置错</td><td>key 没进宿主配置</td><td>重跑 <code>--set-llm</code>，<strong>完全重启</strong>宿主</td></tr>
+      <tr><td class="k">说了事实但没记住</td><td>任务指令 / 模型判定不值得记 / 余额</td><td><code>control why --last</code>，一行告诉你原因</td></tr>
+      <tr><td class="k">想不起昨天说的</td><td>关键词降级、项目不一致</td><td><code>doctor.py</code> 看 <code>vec</code> 是否 <code>ready</code>；问「当前库和项目」</td></tr>
+      <tr><td class="k">每次等很久</td><td>无独显时 CPU 编码慢</td><td>正常，首次约 10–15 秒；<code>doctor.py</code> 会写预估</td></tr>
+      <tr><td class="k">面板打不开 / 打开了空库</td><td>服务没起、或看了另一个库</td><td>从原入口重开；面板里看「设置与切换库」当前指向</td></tr>
+      <tr><td class="k">Codex 看到的库不对</td><td>自行启动时 MCP 与钩子不是同一目录</td><td>重跑安装器，完整重启，问「当前库和项目」</td></tr>
+    </tbody>
+  </table>
+
+  <h3>三条自查</h3>
+  <pre><code># 1. 环境与模型是否就绪
+uv run python scripts/doctor.py
+
+# 2. 上一轮为什么没写
+uv run python -m March7.control why --last
+
+# 3. 库健康与残留
+uv run python -m March7.control health</code></pre>
+
+  <div class="note"><b>反馈时贴什么：</b>完整命令 + 完整报错 + 退出码。别贴 key、别贴私人正文。</div>
+</section>
+
+<!-- 11 -->
+<section class="s" id="privacy">
+  <h2><span class="n">11</span>隐私、数据与卸载</h2>
+
+  <h3>数据在哪儿</h3>
+  <table class="t">
+    <thead><tr><th style="width:30%">内容</th><th>位置</th><th style="width:22%">离开本机吗</th></tr></thead>
+    <tbody>
+      <tr><td class="k">记忆库（SQLite）</td><td><code>~/.March7/March7.db</code></td><td>不会</td></tr>
+      <tr><td class="k">画像</td><td><code>~/.March7/profile.json</code></td><td>不会</td></tr>
+      <tr><td class="k">写入账本与日志</td><td><code>~/.March7/logs/</code></td><td>不会</td></tr>
+      <tr><td class="k">要判断的对话原文</td><td>每轮结束时发给模型</td><td><strong>会</strong></td></tr>
+      <tr><td class="k">命中的记忆</td><td>每轮开始时随宿主上下文</td><td><strong>会</strong>（发给宿主用的模型）</td></tr>
+    </tbody>
+  </table>
+  <p>最后两行是核心事实：<strong>用哪家模型，就等于把那部分内容交给哪家。</strong>这一点无法用本地代码消除。</p>
+
+  <h3>停止使用</h3>
+  <pre><code>uv run python hosts/workbuddy/install.py --uninstall
+uv run python hosts/codex/install.py --uninstall
+uv run python hosts/dsh/install.py --uninstall</code></pre>
+  <p>卸载只移除 March7 自己写的配置，<strong>不动记忆库</strong>。想连数据一起清掉，先决定要不要导出，再执行：</p>
+  <pre><code>uv run python -m March7.control erase --all</code></pre>
+  <p>两件事刻意分开：卸载是「不想用了」，删数据是「忘掉我」。</p>
+</section>
+
+<!-- 12 -->
+<section class="s" id="feedback">
+  <h2><span class="n">12</span>反馈</h2>
+  <p>填随包的 <a href="docs/FEEDBACK.md">首测反馈</a>：四道单选题，不到 3 分钟。最要紧的三件——</p>
+  <ol>
+    <li><strong>哪一步卡住了</strong>：贴命令 + 完整报错；</li>
+    <li><strong>它记错了什么</strong>：比漏记严重得多；</li>
+    <li><strong>删了之后还能不能搜到</strong>：这是硬承诺，残留即 P0。</li>
+  </ol>
+  <p>填完发回给发你测试包的人；就在聊天里的话，直接贴过去也行。</p>
+</section>
+
+<!-- 附录 A -->
+<section class="s" id="cli">
+  <h2><span class="n">A</span>命令行参考（补充）</h2>
+  <p class="sub">日常用不到。装不上、想批量处理、或者在排查时才看。</p>
+
+  <h3>看</h3>
+  <pre><code>uv run python -m March7.control list              # 列记忆（带编号）
+uv run python -m March7.control show 记忆编号      # 一条的全部派生面
+uv run python -m March7.control health            # 库健康
+uv run python -m March7.control audit             # 全量残留审计（不删）
+uv run python -m March7.control receipts           # 擦除回执
+uv run python -m March7.control why --last         # 上一轮为什么没写
+uv run python -m March7.control web --port 8765    # 只读网页版</code></pre>
+
+  <h3>改</h3>
+  <pre><code>uv run python -m March7.control archive 记忆编号
+uv run python -m March7.control fix 记忆编号 --content "正确内容"
+uv run python -m March7.control erase 记忆编号      # 按提示确认</code></pre>
+
+  <h3>导出</h3>
+  <pre><code>uv run python -m March7.control export --format md
+uv run python -m March7.control export --format json</code></pre>
+
+  <h3>安装器参数速查</h3>
+  <table class="t">
+    <thead><tr><th style="width:34%">参数</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td class="k">--doctor</td><td>只读前置检查</td></tr>
+      <tr><td class="k">--set-llm</td><td>配置模型三件套（探针通过才写）</td></tr>
+      <tr><td class="k">--apply</td><td>写入宿主配置，失败整体回滚</td></tr>
+      <tr><td class="k">--panel-only</td><td>只刷新面板钩子（Codex）</td></tr>
+      <tr><td class="k">--reuse</td><td>允许复用非空数据目录</td></tr>
+      <tr><td class="k">--data-dir</td><td>指定数据目录</td></tr>
+      <tr><td class="k">--upgrade</td><td>升级库：备份 → 迁移 → 行数对账</td></tr>
+      <tr><td class="k">--uninstall</td><td>还原宿主配置</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 附录 B -->
+<section class="s" id="files">
+  <h2><span class="n">B</span>文件与目录</h2>
+  <table class="t">
+    <thead><tr><th style="width:32%">路径</th><th>是什么</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><code>用户手册.html</code></td><td>本文件，离线可看</td></tr>
+      <tr><td class="k"><code>README.md</code></td><td>项目简介与平台状态</td></tr>
+      <tr><td class="k"><code>AI-SETUP.md</code></td><td>给你的 AI 助手看的安装协议（让它替你装时用）</td></tr>
+      <tr><td class="k"><code>docs/ONBOARDING.md</code></td><td>纯文字安装步骤与退出码表</td></tr>
+      <tr><td class="k"><code>docs/FEEDBACK.md</code></td><td>反馈表</td></tr>
+      <tr><td class="k"><code>docs/HOST-MATRIX.md</code></td><td>三宿主能力与证据边界</td></tr>
+      <tr><td class="k"><code>SECURITY.md</code></td><td>数据边界与擦除范围</td></tr>
+      <tr><td class="k"><code>WHICH-BUILD.txt</code></td><td>这包是哪一版、对应哪个提交</td></tr>
+      <tr><td class="k"><code>~/.March7/</code></td><td>记忆库、画像、日志（默认数据目录）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+</div>
+
+<footer class="footer"><div class="wrap">
+  <span>March7 用户手册 · 2026-11-26 · 适用于 0.1.0 测试版</span>
+  <span><a href="#top">返回顶部</a> · <a href="AI-SETUP.md">让 AI 帮你装</a></span>
+</div></footer>
+
+<script>
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  if(!('IntersectionObserver' in window))return;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var i=secs.indexOf(e.target); if(i<0)return;
+      links.forEach(function(l){l.classList.remove('on');});
+      links[i].classList.add('on');
+    });
+  },{rootMargin:'-8% 0px -72% 0px',threshold:0});
+  secs.forEach(function(s){if(s)io.observe(s);});
+})();
+</script>
+</body>
+</html>

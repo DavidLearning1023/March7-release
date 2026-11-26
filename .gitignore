@@ -1,0 +1,119 @@
+# ---- Python / uv ----
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# ---- 密钥与本地配置 ----
+.env
+
+# ---- 运行时数据（硬红线：记忆库与真实对话永不入库）----
+*.db
+*.db-wal
+*.db-shm
+evals/dataset/raw/*
+!evals/dataset/raw/README.md
+
+# ---- REAL-8 的真实脱敏对话（2026-11-12 起不入库）----
+# 8 条真实 WorkBuddy 转写经规则脱敏后得到，`--review` 已 0 命中，
+# 但 David 明确要求**真实语料不进 git**（D5：代码仓暂不公开，且"不公开"与"可入库"是两件事）。
+#
+# ⚠️ **连带后果（必须知道）**：
+# 别人 clone 下来**跑不了 `--suite real8`**（缺 sessions/entries），
+# 报告里 §3.3 那一节**无法复算**。这是有意的取舍：宁可少一节可复现性，
+# 也不把真实对话推到远端。`entries.template.jsonl` 仍入库（只有空壳，无原文）。
+#
+# 想在本机复现：保留现有目录即可（文件还在磁盘上，只是不再被 git 跟踪）；
+# 换机后需从 `raw/` 重新 `--build`（raw 同样不入库 ⇒ 换机后就真的没有了）。
+evals/dataset/real8/sessions.jsonl
+evals/dataset/real8/entries.jsonl
+
+# ---- REAL-20 的真实脱敏对话（S10，2026-11-12 起不入库）----
+# 20 条真实 WorkBuddy 会话（采集口径见 `evals/handoff/real20.py` 模块文档）。
+# 同样的红线：真实语料永不入 git。`entries.template.jsonl` 仍入库（只有空壳）。
+# ⚠️ 连带后果：别人 clone 下来 `--suite real20` 会报"缺 entries.jsonl"，属预期。
+evals/dataset/real20/sessions.jsonl
+evals/dataset/real20/entries.jsonl
+# 成绩 CSV **比 S6 收紧一格**：它 120 行、每行含 question/gold/response，
+# 合起来几乎等于整份真实语料的派生副本 ⇒ 本机保留、不入库。
+# （S6 的 `handoff_real8_*.csv` 是入过库的；那 36 行的内容全是课程名/BV 号，风险不同。
+#   这次不沿用，理由写在 `evals/reports/handoff-s10-20261112.md` §5.3。）
+evals/reports/handoff_real20_*.csv
+*.log
+
+# ---- 评测数据红线（T4–T5 审查修订 🔴-5）----
+# 公开基准真数据（LongMemEval / LoCoMo）体积大、许可见上游；
+# 放置后会被 `--suite full` 自动发现 —— 绝不能被 git 跟踪。只留 fixture 入库。
+evals/harness/data/*.json
+!evals/harness/data/fixture_*.json
+
+# ---- 冒烟产物（T4–T5 审查修订 🟡-4）----
+# results_smoke_*.csv 整表由 REPLAY 回放产生，不代表任何系统的成绩，永不入库。
+# T6 的真实基线 CSV **不在忽略之列，可按需留档**。
+# 2026-10-12 补充**留档判据**：只有「**成功跑完**」的产物才入库——判分失败=0、
+# 未被限流污染（无大批空回答）、`judge_mode=llm_judge`。当次曾有一批 68% 空回答的
+# 结果（MiniMax 速率限制所致）必须作废，绝不能因为"文件在 reports/ 里"就被当成成绩。
+evals/reports/results_smoke_*.csv
+
+# ---- 作废的成绩 CSV（S6 遗留修复，2026-11-11）----
+# 为什么单独建 void/ 而不是删掉：S6 收口时把两批作废 CSV（h36 首跑被 429 污染、
+# h128 首跑 12 条臂调用失败）**删了**，于是独立验收判 A4「哪次用了哪批」时，
+# **产物不在了、无法审计**。删与留都不改变"那两批作废"这个事实，
+# 但留着能让后来人自己核对"作废是真的"。
+# 规则：作废产物一律 `mv` 到 `evals/reports/void/`，**不许 rm**；
+# 该目录整体 gitignore（作废数据不该进仓库，但要留在本机可查）。
+evals/reports/void/
+
+# ---- T17 驻留实验的逐轮轨迹（可复算的中间产物，不是成绩）----
+# 一次全量约 1.6 万行、数 MiB（确切体积由报告实测给出，不在此写死）；成绩源是同目录下的 residency_*.csv（入库），
+# 报告是 residency_*.md（入库）。Trajectory 由验收命令本地重生成，逐位一致：
+#   uv run python -m evals.harness.run --suite residency
+# 不入库的理由：体积大、每跑一次就多一份、且确定性仿真无需留档原始数据。
+evals/reports/residency_trajectory_*.jsonl
+
+# ---- 编辑器 / 系统 ----
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# ---- 本地备份（脚本自动生成，含全量数据，永不入库）----
+# 2026-11-10 加：rq0_merge_labels.py 每次写 answer_labels_200.jsonl 都会留一份时间戳副本
+*.jsonl.bak-*
+
+# ---- 凭据与本地回执（永不入库）----
+# 2026-11-12 加（ADR-0048）：换模型时生成的旧值备份含 API key 明文。
+# 宿主的 mcp.json / cordis.patch.yml 都在仓库外，但本地备份可能落在仓库内，
+# 这里兜住一层，避免"某天手滑 git add ."把 key 带上去。
+.env
+.env.local
+.March7-env-backup-*.json
+*.key
+
+# ---- 证据截图（本机留档，不入库）----
+# 2026-11-12 加：S8 的截图是"库内实况的可视摘要"，数值随库变化。
+# 入库会让仓库里存一张会过期的图（且每次跑都产生二进制 diff）。
+# 要复现就 `python scripts/render_s8_evidence.py --png`。
+evals/reports/s8-evidence/*.png
+
+# ---- S9 A/B 试点缓存（2026-11-12）----
+# `scripts/_s9_ab_ctx.py` 跑归因对照时产生的摄入/判分缓存（含候选文本与回答全文）。
+# 它们是**中间产物**：CSV 才是证据，缓存只是"免得重烧 LLM"。
+# 体积 0.2–1.2MB/次，且与 `~/.March7-dev/eval-cache` 的内容重复。
+evals/reports/s9-ab-*/
+
+# ---- S5x 思考 A/B 的逐轮原始产物（2026-11-12）----
+# `_s51_thinking_ab.py` 产出的 arm-*.jsonl 含 194 轮完整转写与候选全文（每份 ~200KB）。
+# 结论在 `s51-thinking-ab/compare.json` 与 `ADR-0051`，原始逐轮数据只是复算素材。
+# 保留 compare.json，忽略 arm-*.jsonl：后者体积大且包含整段对话原文。
+evals/reports/s51-thinking-ab/arm-*.jsonl
+
+# ---- 分发包产物（S11c，2026-11-14）----
+# `scripts/build_dist.py` 的产出。每次打包都生成一份 3MB 的二进制，
+# 且它完全可以从 HEAD 重建（`python scripts/build_dist.py`）⇒ 不入库。
+dist/
+
+# ---- 工作区记忆（WorkBuddy 本地产物，2026-11-14）----
+# 这是助手在本仓库的工作记录，不是项目交付物。
+.workbuddy/

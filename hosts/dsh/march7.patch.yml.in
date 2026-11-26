@@ -1,0 +1,27 @@
+# March7 → DSH 用户层补丁（由 hosts/dsh/install.py 渲染；**这份是模板，别直接改**）。
+# 为什么不能手写：里面有三样"每台机器都不同"的值，其中密钥不能进仓库。
+# 渲染命令：python hosts/dsh/install.py --emit > <仓外路径>.yml
+- insert:
+    - id: mcp-march7
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: March7
+        transport: stdio
+        command: '@PYTHON@'
+        args:
+          - '-m'
+          - 'March7'
+        env:
+          MARCH7_HOME: '@DATA_DIR@'
+          PYTHONIOENCODING: 'utf-8'
+          PYTHONUNBUFFERED: '1'
+          # 宿主代理变量漏进 stdio 子进程会让 httpx 解析代理 URL 时抛
+          # `ValueError: invalid literal for int(): ':1]'`（2026-11-10 实测）
+          NO_PROXY: '*'
+          no_proxy: '*'
+          HTTP_PROXY: ''
+          HTTPS_PROXY: ''
+          http_proxy: ''
+          https_proxy: ''
+@LLM_ENV@
+@INJECT_ENTRY@

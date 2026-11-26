@@ -1,0 +1,61 @@
+[project]
+name = "March7-memory"
+version = "0.1.0"
+description = "Host-agnostic long-term memory MCP server for AI companions（跨宿主长期记忆插件·三月七）"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+# ADR-0062：署名口径与 LICENSE 一致（拼音全名在前，见 docs/ATTRIBUTION.md §2.1）。
+# email 用 GitHub noreply 而不是 QQ 邮箱：METADATA 会带到 PyPI 且几乎不可能撤回。
+authors = [
+    { name = "XU Zhongrong", email = "1786314617+DavidLearning1023@users.noreply.github.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2.0,<3",
+    "sqlite-vec>=0.1.6",
+    "sentence-transformers>=3.0",
+    "openai>=1.40",
+    "pydantic>=2.7",
+    # T1b（ADR-0008）：torch 必须显式声明为直接依赖，`[tool.uv.sources]` 才会生效
+    # （uv 的 sources 只作用于直接依赖；torch 原本经 sentence-transformers 间接引入，会被静默忽略）。
+    # 安装集不变：仍是同一批 94 个包，只是把已有的间接依赖显式化。
+    "torch>=2.14",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+# T1b（ADR-0008）：Windows x64 的 torch 取自 PyTorch CUDA 索引。
+# 不这样做的话，PyPI 上的 Windows 轮子是 CPU 版（实测 2.14.0+cpu），BGE-M3 会静默降级 CPU，
+# 而 T9 的「GPU→CPU 自动回退」验收会把该问题掩盖。
+# 选 cu130 而非 cu126：CUDA 12.6 不含 sm_120 内核（RTX 5060 Ti = Blackwell），且 cu128/cu129
+# 索引里没有 2.14.0 的 Windows 轮子；cu130 与本机驱动 610.74 / CUDA UMD 13.3 匹配。
+# S22（ADR-0081）：仅 Apple Silicon 回到默认 PyPI，保留其他平台的原选源。
+# explicit = true 表示该索引只服务显式引用它的包（torch），其余包仍走默认 PyPI。
+[tool.uv]
+constraint-dependencies = ["torch==2.14.0; sys_platform == 'darwin' and platform_machine == 'arm64'"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130", marker = "sys_platform != 'darwin' or platform_machine != 'arm64'" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# 注意：包目录是 src/March7（大写 M，见 docs/NAMING.md §2.1）
+packages = ["src/March7"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# S0 骨架期：未实现模块的测试用 xfail(raises=NotImplementedError, strict=False) 标记，
+# 实现落地后自动转绿；禁止为跑绿而改断言（见 docs/CONVENTIONS.md §4）。
+xfail_strict = false
